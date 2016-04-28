@@ -8,7 +8,7 @@ Created on Mon Apr 25 17:11:44 2016
 """
 
 import numpy as np
-import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 streamlength = 3000
 numnodes = 300
@@ -37,17 +37,17 @@ def SimpleSteadyState():
     x_coords = np.linspace(0.0, streamlength, num=numnodes+1)
     z_coords_raw = np.zeros(numnodes+1)
     
-    print len(x_coords), len(z_coords_raw)
+    #print len(x_coords), len(z_coords_raw)
     
     m = calc_m(movern, n)
     
-    print x_coords
+    #print x_coords
     
     Scrit_radians = calc_Scrit_radians(Scrit_deg)
-    print Scrit_radians    
+    #print Scrit_radians    
     
     DX = calc_DX(numnodes, streamlength)
-    print DX
+    #print DX
     
     for i in range(len(x_coords)-1, 0, -1):
         if x_coords[i] < chanhead_pos and i != numnodes:
@@ -62,7 +62,37 @@ def SimpleSteadyState():
     
     z_coords = z_coords_raw - z_raw_end
     
-    print z_coords
+    #print z_coords
+    
+    return x_coords, z_coords
             
+def plot_2DProfile(x_coords, y_coords):
+    
+    fig, ax = mpl.pyplot.subplots()
+    
+    plt.plot(x_coords, y_coords)
+    plt.show()
+    
 
-SimpleSteadyState()    
+xs, ys = SimpleSteadyState()    
+
+plot_2DProfile(xs, ys)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
