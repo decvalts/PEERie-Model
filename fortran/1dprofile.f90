@@ -5,7 +5,7 @@ Program onedprofile
     implicit none
 
     real :: transport, c, D, time, factor, max, totsed, delta_h, sum;
-    integer :: bedrock, xc, y, lattice_size, check, i, ci
+    integer :: bedrock, xc, y, lattice_size, check, i
 
     real, dimension (:), allocatable :: h, h_old
     
@@ -22,10 +22,10 @@ Program onedprofile
 
     xc = bedrock
 
-    do ci = i, lattice_size
+    do i = 1, lattice_size
        if (i .gt. bedrock) then
           h(i) = 0.0
-          h_old = 0.0
+          h_old(i) = 0.0
 
           ! plot the initial condition
           ! write(...)
@@ -61,7 +61,7 @@ Program onedprofile
           h(1) = h(1) - delta_h
           totsed = delta_h
 
-          do i=2, lattice_size
+          do i=2, lattice_size - 1
              delta_h = c * factor * (i/float(lattice_size)) * h_old(i) - h_old(i+1)
              totsed = totsed + delta_h
              transport = D * factor * (i/float(lattice_size)) * h_old(i) - h_old(i+1)
@@ -75,24 +75,25 @@ Program onedprofile
                               - D * factor * (i/float(lattice_size)) * (h_old(i) - h_old(i+1))
                    if (abs(delta_h) .gt. max) then
                       max = abs(delta_h)
-                      h(i) = h(i) - delta_h
                    endif
+                   h(i) = h(i) + delta_h
                 endif
              endif
           enddo
       endif
 
-          if (max .lt. 0.001) then
-             do i=1, lattice_size
-                h_old(i) = h(i)
-                time = time + factor
-             enddo
-          else
-             h(i) = h_old(i)
-             factor = factor / 3
-          endif
-          if (max .lt. 0.0001) then
-             factor = factor * 3
-          endif
+      if (max .lt. 0.001) then
+         do i=1, lattice_size
+             h_old(i) = h(i)
+             time = time + factor
+          enddo
+      else
+          h(i) = h_old(i)
+          factor = factor / 3
+      endif
+      if (max .lt. 0.0001) then
+          factor = factor * 3
+      endif
   enddo
-endprogram onedprofile
+end
+! endprogram onedprofile
