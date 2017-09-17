@@ -1,6 +1,7 @@
-  ! A 1d profile model of river channel evolution
+! A 1d profile model of river channel evolution
+! based on J. Pelletier's C version. (2008)
 
-  Program 1dprofile
+Program 1dprofile
     use implicit none
 
     real :: transport, c, D, time, factor, max, totsed, delta_h, sum;
