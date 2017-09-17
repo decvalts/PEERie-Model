@@ -9,8 +9,8 @@ Program onedprofile
 
     real, dimension (:), allocatable :: h, h_old
     
-    !open(file="space1.txt")
-    !open(file="time1.txt")
+    open(unit=1,file="space1.txt")
+    open(unit=2,file="time1.txt")
 
     c = 0.1
     D = 1.0
@@ -29,11 +29,12 @@ Program onedprofile
           
           ! plot the initial condition
           ! write(...)
-          
+          write(1,fmt='(2(f9.5))') i/float(lattice_size),h(i)
        else
           h(i) = 1.0
           h_old(i) = 1.0
           ! write the value write(...)
+          write(1,fmt='(2(f9.5))') i/float(lattice_size),h(i)
        endif
     enddo
 
@@ -50,11 +51,14 @@ Program onedprofile
           do i=1, lattice_size
              summ = summ + h(i)
              ! write result
+             write(1,fmt='(2(f9.5))') i/float(lattice_size),h(i)
           enddo
 
           ! write time sum/lattice-size
           ! write xc
-          print *, time, summ/lattice_size
+          !print *, time, summ/lattice_size
+          write(2,*) time, summ/lattice_size
+          write(1,fmt='(2(f9.5))') xc/float(lattice_size),h(xc)
        endif
        maxx = 0.0
        totsed = 0.0
