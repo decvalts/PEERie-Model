@@ -4,7 +4,7 @@
 Program onedprofile
     implicit none
 
-    real :: transport, c, D, time, factor, max, totsed, delta_h, sum;
+    real :: transport, c, D, time, factor, maxx, totsed, delta_h, summ;
     integer :: bedrock, xc, y, lattice_size, check, i
 
     real, dimension (:), allocatable :: h, h_old
@@ -26,9 +26,10 @@ Program onedprofile
        if (i .gt. bedrock) then
           h(i) = 0.0
           h_old(i) = 0.0
-
+          
           ! plot the initial condition
           ! write(...)
+          
        else
           h(i) = 1.0
           h_old(i) = 1.0
@@ -39,61 +40,63 @@ Program onedprofile
     factor = 1.0
     time = 0.0
     check = 1000
-    
+    maxx = 0.0
+   
     do while (time .lt. 100000.0)
+       !print *, time
        if (time .gt. check) then
-          sum = 0
+          summ = 0
           check = check + 10000
           do i=1, lattice_size
-             sum = sum + h(i)
+             summ = summ + h(i)
              ! write result
           enddo
 
           ! write time sum/lattice-size
           ! write xc
+          print *, time, summ/lattice_size
+       endif
+       maxx = 0.0
+       totsed = 0.0
+       delta_h = c * factor * (1/float(lattice_size)) * (h(1) - h(2))
+       if (abs(delta_h) .gt. maxx) then
+          maxx = abs(delta_h)
+       endif
+       h(1) = h(1) - delta_h
+       totsed = delta_h
 
-          max = 0
-          totsed = 0
-          delta_h = c * factor * (1/float(lattice_size)) * (h(1) - h(2))
-          if (abs(delta_h) .gt. max) then
-             max = abs(delta_h)
-          endif
-          h(1) = h(1) - delta_h
-          totsed = delta_h
-
-          do i=2, lattice_size - 1
-             delta_h = c * factor * (i/float(lattice_size)) * h_old(i) - h_old(i+1)
-             totsed = totsed + delta_h
-             transport = D * factor * (i/float(lattice_size)) * h_old(i) - h_old(i+1)
-             if ((transport .gt. (totsed + 0.01)) .and. (i .le. bedrock)) then
-                xc = i
-                if (abs(delta_h) .gt. max) then
-                   max = abs(delta_h)
-                   h(i) = h(i) - delta_h
-                else
-                   delta_h = D * factor * ((i-1)/float(lattice_size)) * (h_old(i-1) - h_old(i)) &
-                              - D * factor * (i/float(lattice_size)) * (h_old(i) - h_old(i+1))
-                   if (abs(delta_h) .gt. max) then
-                      max = abs(delta_h)
-                   endif
-                   h(i) = h(i) + delta_h
-                endif
+       do i=2, (lattice_size - 1)
+          delta_h = c * factor * (i/float(lattice_size)) * (h_old(i) - h_old(i+1))
+          totsed = totsed + delta_h
+          transport = D * factor * (i/float(lattice_size)) * (h_old(i) - h_old(i+1))
+          if ((transport .gt. (totsed + 0.01)) .and. (i .le. bedrock)) then
+             xc = i
+             if (abs(delta_h) .gt. maxx) then
+                maxx = abs(delta_h)
              endif
-          enddo
-      endif
-
-      if (max .lt. 0.001) then
+             h(i) = h(i) - delta_h
+          else
+             delta_h = D * factor * ((i-1)/float(lattice_size)) * (h_old(i-1) - h_old(i)) &
+                        - D * factor * (i/float(lattice_size)) * (h_old(i) - h_old(i+1))
+             if (abs(delta_h) .gt. maxx) then
+                maxx = abs(delta_h)
+             endif
+             h(i) = h(i) + delta_h
+          endif
+      enddo
+      
+      if (maxx .lt. 0.001) then
          do i=1, lattice_size
              h_old(i) = h(i)
              time = time + factor
-          enddo
+         enddo
       else
           h(i) = h_old(i)
-          factor = factor / 3
+          factor = factor / 3.0
       endif
-      if (max .lt. 0.0001) then
-          factor = factor * 3
+      if (maxx .lt. 0.0001) then
+          factor = factor * 3.0
       endif
+      print *, time, factor
   enddo
-end
-! endprogram onedprofile
+end program onedprofile
