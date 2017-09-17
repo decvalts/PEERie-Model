@@ -99,4 +99,6 @@ Program onedprofile
       endif
       print *, time, factor
   enddo
+  deallocate(h)
+  deallocate(h_old)
 end program onedprofile
