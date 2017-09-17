@@ -1,11 +1,11 @@
 ! A 1d profile model of river channel evolution
 ! based on J. Pelletier's C version. (2008)
 
-Program 1dprofile
-    use implicit none
+Program onedprofile
+    implicit none
 
     real :: transport, c, D, time, factor, max, totsed, delta_h, sum;
-    integer :: bedrock, xc, y, lattice_size, check
+    integer :: bedrock, xc, y, lattice_size, check, i, ci
 
     real, dimension (:), allocatable :: h, h_old
     
@@ -18,7 +18,7 @@ Program 1dprofile
     bedrock = 16       ! bedrock-alluvial transition distance from divide
 
     allocate (h(lattice_size))
-    allocate (h_old(lattice_size)
+    allocate (h_old(lattice_size))
 
     xc = bedrock
 
@@ -43,9 +43,9 @@ Program 1dprofile
     do while (time .lt. 100000.0)
        if (time .gt. check) then
           sum = 0
-          check += 10000
+          check = check + 10000
           do i=1, lattice_size
-             sum += h(i)
+             sum = sum + h(i)
              ! write result
           enddo
 
@@ -58,40 +58,41 @@ Program 1dprofile
           if (abs(delta_h) .gt. max) then
              max = abs(delta_h)
           endif
-          h(1) -= delta_h
+          h(1) = h(1) - delta_h
           totsed = delta_h
 
           do i=2, lattice_size
              delta_h = c * factor * (i/float(lattice_size)) * h_old(i) - h_old(i+1)
-             totsed += delta_h
-             transport = D * factor * (i/float(lattice_size)) * h_old(i) - hold(i+1)
+             totsed = totsed + delta_h
+             transport = D * factor * (i/float(lattice_size)) * h_old(i) - h_old(i+1)
              if ((transport .gt. (totsed + 0.01)) .and. (i .le. bedrock)) then
                 xc = i
                 if (abs(delta_h) .gt. max) then
                    max = abs(delta_h)
-                   h(i) -= delta_h
+                   h(i) = h(i) - delta_h
                 else
-                   delta_h = D * factor * ((i-1)/float(lattice_size)) * (h_old(i-1) - h_old(i)) - D * factor * (i/float(lattice_size) * (h_old(i) - h_old(i+1))
+                   delta_h = D * factor * ((i-1)/float(lattice_size)) * (h_old(i-1) - h_old(i)) &
+                              - D * factor * (i/float(lattice_size)) * (h_old(i) - h_old(i+1))
                    if (abs(delta_h) .gt. max) then
                       max = abs(delta_h)
-                      h(i) -= delta_h
+                      h(i) = h(i) - delta_h
                    endif
                 endif
              endif
           enddo
+      endif
 
           if (max .lt. 0.001) then
              do i=1, lattice_size
                 h_old(i) = h(i)
-                time += factor
+                time = time + factor
              enddo
           else
              h(i) = h_old(i)
-             factor /= 3
+             factor = factor / 3
           endif
           if (max .lt. 0.0001) then
-             factor *= 3
+             factor = factor * 3
           endif
-          
-                
-       
+  enddo
+endprogram onedprofile
